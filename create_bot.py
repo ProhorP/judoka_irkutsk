@@ -1,4 +1,5 @@
 import logging
+import os
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -30,3 +31,5 @@ questions = {
     9: {'qst': 'Что такое H2O?', 'answer': 'Вода'},
     10: {'qst': 'Какой океан самый большой?', 'answer': 'Тихий океан'},
 }
+
+all_media_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'all_media')
