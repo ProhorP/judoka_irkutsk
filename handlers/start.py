@@ -19,11 +19,11 @@ async def cmd_start(message: Message, command: CommandObject):
     command_args: str = command.args
     if command_args:
         await message.answer(
-            f'Запуск сообщения по команде /start используя фильтр CommandStart() с меткой <b>{command_args}</b>',
+            f'Запуск сообщения по команде /start используя фильтр CommandStart() с меткой <b>{command_args}</b> {message.from_user.id}',
             reply_markup=main_kb(message.from_user.id))
     else:
         await message.answer(
-            f'Запуск сообщения по команде /start используя фильтр CommandStart() без метки',
+            f'Запуск сообщения по команде /start используя фильтр CommandStart() без метки {message.from_user.id}',
             reply_markup=main_kb(message.from_user.id))
 
 @start_router.message(Command('start_2'))
@@ -61,7 +61,8 @@ async def send_random_person(call: CallbackQuery):
 
 @start_router.callback_query(F.data == 'back_home')
 async def send_back_home(call: CallbackQuery):
-    await call.message.answer('Enter /start', show_alert=False)
+    await call.message.answer(f'Enter /start {call.from_user.id}', show_alert=False)
+    await bot.send_message(chat_id=301711111, text='Hello Nelli!')
 
 @start_router.message(Command('faq'))
 async def cmd_start_2(message: Message):
