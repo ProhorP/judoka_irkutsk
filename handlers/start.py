@@ -61,14 +61,14 @@ async def send_random_person(call: CallbackQuery):
 
 @start_router.callback_query(F.data == 'back_home')
 async def send_back_home(call: CallbackQuery):
-    await call.message.answer('Enter /start', reply_markup=ease_link_kb())
+    await call.message.answer('Enter /start', show_alert=False)
 
 @start_router.message(Command('faq'))
 async def cmd_start_2(message: Message):
     await message.answer('Сообщение с инлайн клавиатурой с вопросами', reply_markup=create_qst_inline_kb(questions))
 
 @start_router.callback_query(F.data.startswith('qst_'))
-async def cmd_start(call: CallbackQuery):
+async def cmd_start1(call: CallbackQuery):
     await call.answer()
     qst_id = int(call.data.replace('qst_', ''))
     qst_data = questions[qst_id]
@@ -78,3 +78,14 @@ async def cmd_start(call: CallbackQuery):
     async with ChatActionSender(bot=bot, chat_id=call.from_user.id, action="typing"):
         await asyncio.sleep(2)
         await call.message.answer(msg_text, reply_markup=create_qst_inline_kb(questions))
+
+@start_router.message(Command(commands=["settings", "about"]))
+async def univers_cmd_handler(message: Message, command: CommandObject):
+    command_args: str = command.args
+    command_name = 'settings' if 'settings' in message.text else 'about'
+    response = f'Была вызвана команда /{command_name}'
+    if command_args:
+        response += f' с меткой <b>{command_args}</b>'
+    else:
+        response += ' без метки'
+    await message.answer(response)
