@@ -7,12 +7,15 @@ from create_bot import bot
 async def set_commands():
     commands = [BotCommand(command='start', description='Старт'),
                 BotCommand(command='start_2', description='Старт 2'),
-                BotCommand(command='start_3', description='Старт 3')]
+                BotCommand(command='start_3', description='Старт 3'),
+                BotCommand(command='faq', description='Частые вопросы')
+                ]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
 def main_kb(user_telegram_id: int):
     kb_list = [
-        [KeyboardButton(text="📖 О нас"), KeyboardButton(text="👤 Профиль")],
+        [KeyboardButton(text="Давай инлайн!"), KeyboardButton(text="Давай инлайн v2!"),
+         KeyboardButton(text="👤 Профиль")],
         [KeyboardButton(text="📝 Заполнить анкету"), KeyboardButton(text="📚 Каталог")]
     ]
     if user_telegram_id in admins:
