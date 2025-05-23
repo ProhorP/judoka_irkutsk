@@ -50,3 +50,13 @@ def create_rat():
     builder.button(text='Назад')
     builder.adjust(4, 4, 2, 1)
     return builder.as_markup(resize_keyboard=True)
+
+def gender_kb():
+    kb_list = [
+        [KeyboardButton(text="👨‍🦱Мужчина")], [KeyboardButton(text="👩‍🦱Женщина")]
+    ]
+    keyboard = ReplyKeyboardMarkup(keyboard=kb_list,
+                                   resize_keyboard=True,
+                                   one_time_keyboard=True,
+                                   input_field_placeholder="Выбери пол:")
+    return keyboard
