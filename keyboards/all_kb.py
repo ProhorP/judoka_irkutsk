@@ -10,6 +10,7 @@ async def set_commands():
                 BotCommand(command='start_3', description='Старт 3'),
                 BotCommand(command='faq', description='Частые вопросы'),
                 BotCommand(command='send_audio', description='send audio'),
+                BotCommand(command='send_photo', description='send photo'),
                 ]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
