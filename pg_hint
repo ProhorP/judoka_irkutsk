@@ -1,0 +1,7 @@
+#for debian
+sudo apt install postgresql postgresql-contrib
+
+sudo -u postgres psql
+CREATE DATABASE db1;
+CREATE USER user1 WITH PASSWORD '1111';
+ALTER DATABASE db1 OWNER TO user1;
