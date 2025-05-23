@@ -11,7 +11,7 @@ async def create_table_users(table_name='users_reg'):
             {"name": "gender", "type": String},
             {"name": "age", "type": Integer},
             {"name": "full_name", "type": String},
-            {"name": "user_login", "type": String},
+            {"name": "user_login", "type": String, "options": {"unique": True}},
             {"name": "photo", "type": String},
             {"name": "about", "type": String},
             {"name": "date_reg", "type": TIMESTAMP},
