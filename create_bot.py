@@ -6,6 +6,8 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from decouple import config
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from asyncpg_lite import DatabaseManager
+from decouple import config
 
 # from db_handler.db_class import PostgresHandler
 
@@ -33,3 +35,5 @@ questions = {
 }
 
 all_media_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'all_media')
+
+pg_manager = DatabaseManager(db_url=config('PG_LINK'), deletion_password=config('ROOT_PASS'))
