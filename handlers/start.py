@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
-from keyboards.all_kb import main_kb, create_spec_kb, create_rat
+from keyboards.all_kb import main_kb, create_spec_kb, create_rat, gender_kb
 from keyboards.inline_kbs import ease_link_kb, get_inline_kb, create_qst_inline_kb
 from aiogram.filters import CommandStart, Command, CommandObject
 from create_bot import questions
@@ -11,20 +11,24 @@ from aiogram.types import CallbackQuery
 import asyncio
 from aiogram.utils.chat_action import ChatActionSender
 from create_bot import questions, bot
+from .anketa import Form
+from aiogram.fsm.context import FSMContext
+from db.db import get_user_data
+from handlers.anketa import start_router
 
-start_router = Router()
 
 @start_router.message(CommandStart())
-async def cmd_start(message: Message, command: CommandObject):
-    command_args: str = command.args
-    if command_args:
-        await message.answer(
-            f'Запуск сообщения по команде /start используя фильтр CommandStart() с меткой <b>{command_args}</b> {message.from_user.id}',
-            reply_markup=main_kb(message.from_user.id))
+async def cmd_start(message: Message, state: FSMContext):
+    await state.clear()
+    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+        user_info = await get_user_data(user_id=message.from_user.id)
+
+    if user_info:
+        await message.answer('Привет. Я вижу, что ты зарегистрирован, а значит тебе можно '
+                             'посмотреть, как выглядит твой профиль.', reply_markup=main_kb(message.from_user.id))
     else:
-        await message.answer(
-            f'Запуск сообщения по команде /start используя фильтр CommandStart() без метки {message.from_user.id}',
-            reply_markup=main_kb(message.from_user.id))
+        await message.answer('Привет. Для начала выбери свой пол:', reply_markup=gender_kb())
+        await state.set_state(Form.gender)
 
 @start_router.message(Command('start_2'))
 async def cmd_start_2(message: Message):

@@ -2,7 +2,7 @@ import os
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
 from aiogram.fsm.context import FSMContext
-from handlers.start import start_router
+# from handlers.start import start_router
 from aiogram.filters import Command
 from aiogram.filters.state import State, StatesGroup
 from aiogram.types import Message
@@ -12,11 +12,12 @@ from aiogram.utils.chat_action import ChatActionSender
 from create_bot import bot
 import asyncio
 import re
-from handlers.start import start_router as questionnaire_router
+# from handlers.start import start_router as questionnaire_router
 from keyboards.all_kb import gender_kb
 from keyboards.inline_kbs import get_login_tg, check_data
 from aiogram.types import CallbackQuery
 from aiogram.types import ReplyKeyboardRemove
+from db.db import insert_user
 
 def extract_number(text):
     match = re.search(r'\b(\d+)\b', text)
@@ -37,9 +38,10 @@ class Form(StatesGroup):
     caption = None
 
 # questionnaire_router = Router()
+start_router = Router()
 
 
-@questionnaire_router.message(Command('start_questionnaire'))
+@start_router.message(Command('start_questionnaire'))
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.clear()
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
@@ -48,7 +50,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.gender)
 
 
-@questionnaire_router.message((F.text.lower().contains('мужчина')) | (F.text.lower().contains('женщина')), Form.gender)
+@start_router.message((F.text.lower().contains('мужчина')) | (F.text.lower().contains('женщина')), Form.gender)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(gender=message.text, user_id=message.from_user.id)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
@@ -57,7 +59,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.age)
 
 
-@questionnaire_router.message(F.text, Form.gender)
+@start_router.message(F.text, Form.gender)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
@@ -66,7 +68,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.gender)
 
 
-@questionnaire_router.message(F.text, Form.age)
+@start_router.message(F.text, Form.age)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     check_age = extract_number(message.text)
 
@@ -79,7 +81,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.full_name)
 
 
-@questionnaire_router.message(F.text, Form.full_name)
+@start_router.message(F.text, Form.full_name)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(full_name=message.text)
     text = 'Теперь укажите ваш логин, который будет использоваться в боте'
@@ -94,7 +96,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.user_login)
 
 # вариант когда мы берем логин из профиля телеграмм
-@questionnaire_router.callback_query(F.data, Form.user_login)
+@start_router.callback_query(F.data, Form.user_login)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await call.answer('Беру логин с телеграмм профиля')
     await call.message.edit_reply_markup(reply_markup=None)
@@ -104,14 +106,14 @@ async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
 
 
 # вариант когда мы берем логин из введенного пользователем
-@questionnaire_router.message(F.text, Form.user_login)
+@start_router.message(F.text, Form.user_login)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(user_login=message.from_user.username)
     await message.answer('А теперь отправьте фото, которое будет использоваться в вашем профиле: ')
     await state.set_state(Form.photo)
 
 
-@questionnaire_router.message(F.photo, Form.photo)
+@start_router.message(F.photo, Form.photo)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     photo_id = message.photo[-1].file_id
     await state.update_data(photo=photo_id)
@@ -119,7 +121,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.about)
 
 
-@questionnaire_router.message(F.document.mime_type.startswith('image/'), Form.photo)
+@start_router.message(F.document.mime_type.startswith('image/'), Form.photo)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     photo_id = message.document.file_id
     await state.update_data(photo=photo_id)
@@ -127,13 +129,13 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.about)
 
 
-@questionnaire_router.message(F.document, Form.photo)
+@start_router.message(F.document, Form.photo)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await message.answer('Пожалуйста, отправьте фото!')
     await state.set_state(Form.photo)
 
 
-@questionnaire_router.message(F.text, Form.about)
+@start_router.message(F.text, Form.about)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(about=message.text)
 
@@ -152,19 +154,19 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.set_state(Form.check_state)
 
 # сохраняем данные
-@questionnaire_router.callback_query(F.data == 'correct', Form.check_state)
+@start_router.callback_query(F.data == 'correct', Form.check_state)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await call.answer('Данные сохранены')
-    data = await state.get_data()
-    # await bot.send_message(chat_id=158563881, text=data.get("caption"))
-    await bot.send_photo(chat_id=158563881, photo=data.get('photo'), caption=data.get("caption"))
+    user_data = await state.get_data()
+    await insert_user(user_data)
     await call.message.edit_reply_markup(reply_markup=None)
-    await call.message.answer('Благодарю за регистрацию. Ваши данные успешно сохранены!')
+    await call.message.answer('Благодарю за регистрацию. Ваши данные успешно сохранены!',
+                              reply_markup=main_kb(call.from_user.id))
     await state.clear()
 
 
 # запускаем анкету сначала
-@questionnaire_router.callback_query(F.data == 'incorrect', Form.check_state)
+@start_router.callback_query(F.data == 'incorrect', Form.check_state)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await call.answer('Запускаем сценарий с начала')
     await call.message.edit_reply_markup(reply_markup=None)
