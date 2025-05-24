@@ -35,7 +35,6 @@ class Form(StatesGroup):
     photo = State()
     about = State()
     check_state = State()
-    caption = None
 
 # questionnaire_router = Router()
 start_router = Router()
@@ -147,8 +146,6 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
               f'<b>Возраст</b>: {data.get("age")} лет\n' \
               f'<b>Логин в боте</b>: {data.get("user_login")}\n' \
               f'<b>О себе</b>: {data.get("about")}'
-
-    await state.update_data(caption=caption)
 
     await message.answer_photo(photo=data.get('photo'), caption=caption, reply_markup=check_data())
     await state.set_state(Form.check_state)

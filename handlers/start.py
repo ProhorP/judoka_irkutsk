@@ -94,3 +94,20 @@ async def univers_cmd_handler(message: Message, command: CommandObject):
     else:
         response += ' без метки'
     await message.answer(response)
+
+@start_router.message(F.text.contains('Профиль'))
+async def start_profile(message: Message, state: FSMContext):
+    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+        user_info = await get_user_data(user_id=message.from_user.id)
+        profile_message = (
+            f"<b>👤 Профиль пользователя:</b>\n"
+            f"<b>🆔 ID:</b> {user_info['user_id']}\n"
+            f"<b>💼 Логин:</b> @{user_info['user_login']}\n"
+            f"<b>📛 Полное имя:</b> {user_info['full_name']}\n"
+            f"<b>🧑‍🦰 Пол:</b> {user_info['gender']}\n"
+            f"<b>🎂 Возраст:</b> {user_info['age']}\n"
+            f"<b>📅 Дата регистрации:</b> {user_info['date_reg']}\n"
+            f"<b>📝 О себе:</b> {user_info['about']}\n"
+        )
+
+        await message.answer_photo(photo=user_info.get('photo'), caption=profile_message)

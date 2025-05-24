@@ -28,4 +28,7 @@ async def get_user_data(user_id: int, table_name='users_reg'):
 
 async def insert_user(user_data: dict, table_name='users_reg'):
     async with pg_manager:
-        await pg_manager.insert_data_with_update(table_name=table_name, records_data=user_data)
+        await pg_manager.insert_data_with_update(table_name=table_name,
+                                                 records_data=user_data,
+                                                 conflict_column='user_id',
+                                                 update_on_conflict=True)
