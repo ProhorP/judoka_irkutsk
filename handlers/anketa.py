@@ -41,6 +41,7 @@ start_router = Router()
 
 
 @start_router.message(Command('start_questionnaire'))
+@start_router.message(F.text.contains('Заполнить анкету'))
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.clear()
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
