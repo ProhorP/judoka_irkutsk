@@ -1,18 +1,19 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-def ease_link_kb():
+def inline_contact_kb():
     inline_kb_list = [
-        [InlineKeyboardButton(text="Мой хабр", url='https://habr.com/ru/users/yakvenalex/')],
-        [InlineKeyboardButton(text="Мой Telegram", url='tg://resolve?domain=yakvenalexx')],
-        [InlineKeyboardButton(text="Веб приложение", web_app=WebAppInfo(url="https://tg-promo-bot.ru/questions"))]
+        [InlineKeyboardButton(text="VK", url='https://vk.com/sc_judoist')],
+        [InlineKeyboardButton(text="Канал", url='https://t.me/JudokaIrkutsk')],
+        [InlineKeyboardButton(text="Телефон", callback_data='get_phone')],
+        [InlineKeyboardButton(text="2ГИС", url='https://go.2gis.com/ogwBz')]
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
-def get_inline_kb():
+def get_inline_gender_kb():
     inline_kb_list = [
-        [InlineKeyboardButton(text="Генерировать пользователя", callback_data='get_person')],
-        [InlineKeyboardButton(text="На главную", callback_data='back_home')]
+        [InlineKeyboardButton(text="👨‍🦱Мужчина", callback_data='gender_man')],
+        [InlineKeyboardButton(text="👩‍🦱Женщина", callback_data='gender_woman')]
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
@@ -26,13 +27,6 @@ def create_qst_inline_kb(questions: dict) -> InlineKeyboardMarkup:
                 callback_data=f'qst_{question_id}'
             )
         )
-    # Добавляем кнопку "На главную"
-    builder.row(
-        InlineKeyboardButton(
-            text='На главную',
-            callback_data='back_home'
-        )
-    )
     # Настраиваем размер клавиатуры
     builder.adjust(1)
     return builder.as_markup()
@@ -41,13 +35,6 @@ def check_data():
     kb_list = [
         [InlineKeyboardButton(text="✅Все верно", callback_data='correct')],
         [InlineKeyboardButton(text="❌Заполнить сначала", callback_data='incorrect')]
-    ]
-    keyboard = InlineKeyboardMarkup(inline_keyboard=kb_list)
-    return keyboard
-
-def get_login_tg():
-    kb_list = [
-        [InlineKeyboardButton(text="Использовать мой логин с ТГ", callback_data='in_login')]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb_list)
     return keyboard

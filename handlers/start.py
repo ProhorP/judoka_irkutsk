@@ -1,8 +1,8 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
-from keyboards.all_kb import main_kb, create_spec_kb, create_rat, gender_kb
-from keyboards.inline_kbs import ease_link_kb, get_inline_kb, create_qst_inline_kb
+from keyboards.all_kb import main_kb
+from keyboards.inline_kbs import inline_contact_kb, get_inline_gender_kb, create_qst_inline_kb
 from aiogram.filters import CommandStart, Command, CommandObject
 from create_bot import questions
 
@@ -16,7 +16,6 @@ from aiogram.fsm.context import FSMContext
 from db.db import get_user_data
 from handlers.anketa import start_router
 
-
 @start_router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
@@ -27,46 +26,25 @@ async def cmd_start(message: Message, state: FSMContext):
         await message.answer('Привет. Я вижу, что ты зарегистрирован, а значит тебе можно '
                              'посмотреть, как выглядит твой профиль.', reply_markup=main_kb(message.from_user.id))
     else:
-        await message.answer('Привет. Для начала выбери свой пол:', reply_markup=gender_kb())
+        await message.answer('Привет. Для начала выбери свой пол:', reply_markup=get_inline_gender_kb())
         await state.set_state(Form.gender)
 
-@start_router.message(Command('start_2'))
-async def cmd_start_2(message: Message):
-    await message.answer('Запуск сообщения по команде /start_2 используя фильтр Command()',
-                         reply_markup=create_spec_kb())
-
-@start_router.message(F.text == '/start_3')
+@start_router.message(F.text == 'Связаться с нами')
 async def cmd_start_3(message: Message):
-    await message.answer('Запуск сообщения по команде /start_3 используя магический фильтр F.text!',
-                         reply_markup=create_rat())
+    await message.answer('С нами можно связаться одним из следующих способов',
+                         reply_markup=inline_contact_kb())
 
-@start_router.message(F.text == 'Давай инлайн!')
-async def get_inline_btn_link_1(message: Message):
-    await message.answer('Вот тебе инлайн клавиатура со ссылками!', reply_markup=ease_link_kb())
+@start_router.callback_query(F.data == 'get_phone')
+async def send_phone(call: CallbackQuery):
+    await call.message.answer('+7‒914‒873‒49‒31\n'
+                              '+7‒952‒627‒01‒35\n'
+                              '+7 (3952) 99‒20‒09')
 
-@start_router.message(F.text == 'Давай инлайн v2!')
-async def get_inline_btn_link_2(message: Message):
-    await message.answer('Вот тебе инлайн клавиатура callback!', reply_markup=get_inline_kb())
+# await bot.send_message(chat_id=301711111, text='Hello Nelli!')
 
-@start_router.callback_query(F.data == 'get_person')
-async def send_random_person(call: CallbackQuery):
-    await call.answer('Генерирую случайного пользователя', show_alert=False)
-    user = get_random_person()
-    formatted_message = (
-        f"👤 <b>Имя:</b> {user['name']}\n"
-        f"🏠 <b>Адрес:</b> {user['address']}\n"
-        f"📧 <b>Email:</b> {user['email']}\n"
-        f"📞 <b>Телефон:</b> {user['phone_number']}\n"
-        f"🎂 <b>Дата рождения:</b> {user['birth_date']}\n"
-        f"🏢 <b>Компания:</b> {user['company']}\n"
-        f"💼 <b>Должность:</b> {user['job']}\n"
-    )
-    await call.message.answer(formatted_message)
-
-@start_router.callback_query(F.data == 'back_home')
-async def send_back_home(call: CallbackQuery):
-    await call.message.answer(f'Enter /start {call.from_user.id}', show_alert=False)
-    await bot.send_message(chat_id=301711111, text='Hello Nelli!')
+@start_router.message(F.text == 'На главную')
+async def send_back_home(message: Message):
+    await message.answer(eply_markup=main_kb(message.from_user.id))
 
 @start_router.message(Command('faq'))
 async def cmd_start_2(message: Message):
