@@ -18,9 +18,12 @@ async def create_table_users(table_name='users_reg'):
         ] 
         await pg_manager.create_table(table_name=table_name, columns=columns)
 
-async def get_user_data(user_id: int, table_name='users_reg'):
+async def get_user_data(user_id: int = 0, table_name='users_reg'):
     async with pg_manager:
-        user_info = await pg_manager.select_data(table_name=table_name, where_dict={'user_id': user_id}, one_dict=True)
+        if user_id == 0:
+            user_info = await pg_manager.select_data(table_name=table_name, one_dict=False)
+        else:
+            user_info = await pg_manager.select_data(table_name=table_name, where_dict={'user_id': user_id}, one_dict=True)
         if user_info:
             return user_info
         else:

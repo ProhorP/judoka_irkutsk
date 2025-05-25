@@ -2,19 +2,15 @@ import os
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
 from aiogram.fsm.context import FSMContext
-# from handlers.start import start_router
 from aiogram.filters import Command
 from aiogram.filters.state import State, StatesGroup
 from aiogram.types import Message
-from create_bot import all_media_dir
 from keyboards.all_kb import main_kb
 from aiogram.utils.chat_action import ChatActionSender
 from create_bot import bot
 import asyncio
 import re
-# from handlers.start import start_router as questionnaire_router
-from keyboards.all_kb import gender_kb
-from keyboards.inline_kbs import get_login_tg, check_data
+from keyboards.inline_kbs import get_inline_gender_kb, check_data, get_inline_reg_kb
 from aiogram.types import CallbackQuery
 from aiogram.types import ReplyKeyboardRemove
 from db.db import insert_user
@@ -25,9 +21,9 @@ def extract_number(text):
         return int(match.group(1))
     else:
         return None
-
       
 class Form(StatesGroup):
+    registration = State()
     gender = State()
     age = State()
     full_name = State()
@@ -36,46 +32,44 @@ class Form(StatesGroup):
     about = State()
     check_state = State()
 
-# questionnaire_router = Router()
 start_router = Router()
 
-
-@start_router.message(Command('start_questionnaire'))
-@start_router.message(F.text.contains('Заполнить анкету'))
-async def start_questionnaire_process(message: Message, state: FSMContext):
+@start_router.callback_query(F.data, Form.registration)
+async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await state.clear()
-    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
-        await asyncio.sleep(2)
-        await message.answer('Привет. Для начала выбери свой пол: ', reply_markup=gender_kb())
-    await state.set_state(Form.gender)
+    if call.data == 'yes':
+        await state.update_data(user_id=call.message.from_user.id)
+        await state.update_data(user_login=call.message.from_user.username)
+        async with ChatActionSender.typing(bot=bot, chat_id=call.message.chat.id):
+            await asyncio.sleep(2)
+            await call.message.answer('Привет. Для начала выбери свой пол: ', reply_markup=get_inline_gender_kb())
+        await state.set_state(Form.gender)
 
 
-@start_router.message((F.text.lower().contains('мужчина')) | (F.text.lower().contains('женщина')), Form.gender)
-async def start_questionnaire_process(message: Message, state: FSMContext):
-    await state.update_data(gender=message.text, user_id=message.from_user.id)
-    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+@start_router.callback_query((F.data.lower().contains('мужчина')) | (F.data.lower().contains('женщина')), Form.gender)
+async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
+    await state.update_data(gender=call.message.text)
+    async with ChatActionSender.typing(bot=bot, chat_id=call.message.chat.id):
         await asyncio.sleep(2)
-        await message.answer('Супер! А теперь напиши сколько тебе полных лет: ', reply_markup=ReplyKeyboardRemove())
+        await call.message.answer('Супер! А теперь напиши сколько тебе полных лет: ', reply_markup=ReplyKeyboardRemove())
     await state.set_state(Form.age)
 
 
-@start_router.message(F.text, Form.gender)
-async def start_questionnaire_process(message: Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+@start_router.callback_query(F.data, Form.gender)
+async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
+    await state.update_data(name=call.message.text)
+    async with ChatActionSender.typing(bot=bot, chat_id=call.message.chat.id):
         await asyncio.sleep(2)
-        await message.answer('Пожалуйста, выбери вариант из тех что в клавиатуре: ', reply_markup=gender_kb())
+        await call.message.answer('Пожалуйста, выбери вариант из тех что в клавиатуре: ', reply_markup=get_inline_gender_kb())
     await state.set_state(Form.gender)
 
 
 @start_router.message(F.text, Form.age)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     check_age = extract_number(message.text)
-
     if not check_age or not (1 <= int(message.text) <= 100):
         await message.reply("Пожалуйста, введите корректный возраст (число от 1 до 100).")
         return
-
     await state.update_data(age=check_age)
     await message.answer('Теперь укажите свое полное имя:')
     await state.set_state(Form.full_name)
@@ -84,31 +78,6 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 @start_router.message(F.text, Form.full_name)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(full_name=message.text)
-    text = 'Теперь укажите ваш логин, который будет использоваться в боте'
-
-    if message.from_user.username:
-        text += ' или нажмите на кнопку ниже и в этом случае вашим логином будет логин из вашего телеграмм: '
-        await message.answer(text, reply_markup=get_login_tg())
-    else:
-        text += ' : '
-        await message.answer(text)
-
-    await state.set_state(Form.user_login)
-
-# вариант когда мы берем логин из профиля телеграмм
-@start_router.callback_query(F.data, Form.user_login)
-async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
-    await call.answer('Беру логин с телеграмм профиля')
-    await call.message.edit_reply_markup(reply_markup=None)
-    await state.update_data(user_login=call.from_user.username)
-    await call.message.answer('А теперь отправьте фото, которое будет использоваться в вашем профиле: ')
-    await state.set_state(Form.photo)
-
-
-# вариант когда мы берем логин из введенного пользователем
-@start_router.message(F.text, Form.user_login)
-async def start_questionnaire_process(message: Message, state: FSMContext):
-    await state.update_data(user_login=message.from_user.username)
     await message.answer('А теперь отправьте фото, которое будет использоваться в вашем профиле: ')
     await state.set_state(Form.photo)
 
@@ -138,18 +107,17 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 @start_router.message(F.text, Form.about)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(about=message.text)
-
     data = await state.get_data()
 
     caption = f'Пожалуйста, проверьте все ли верно: \n\n' \
               f'<b>Полное имя</b>: {data.get("full_name")}\n' \
               f'<b>Пол</b>: {data.get("gender")}\n' \
               f'<b>Возраст</b>: {data.get("age")} лет\n' \
-              f'<b>Логин в боте</b>: {data.get("user_login")}\n' \
               f'<b>О себе</b>: {data.get("about")}'
 
     await message.answer_photo(photo=data.get('photo'), caption=caption, reply_markup=check_data())
     await state.set_state(Form.check_state)
+
 
 # сохраняем данные
 @start_router.callback_query(F.data == 'correct', Form.check_state)
@@ -168,5 +136,5 @@ async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await call.answer('Запускаем сценарий с начала')
     await call.message.edit_reply_markup(reply_markup=None)
-    await call.message.answer('Привет. Для начала выбери свой пол: ', reply_markup=gender_kb())
-    await state.set_state(Form.gender)
+    await call.message.answer('Привет. Для начала пройди регистрацию:', reply_markup=get_inline_reg_kb())
+    await state.set_state(Form.registration)

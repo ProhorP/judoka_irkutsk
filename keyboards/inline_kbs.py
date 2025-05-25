@@ -17,6 +17,20 @@ def get_inline_gender_kb():
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
+def get_inline_reg_kb():
+    inline_kb_list = [
+        [InlineKeyboardButton(text="✅Да, пройти регистрацию", callback_data='yes')],
+        [InlineKeyboardButton(text="❌Без регистрации", callback_data='no')]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
+
+def get_inline_notify_kb():
+    inline_kb_list = [
+        [InlineKeyboardButton(text="✅Да, отправить пост", callback_data='yes')],
+        [InlineKeyboardButton(text="❌Нет", callback_data='no')]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
+
 def create_qst_inline_kb(questions: dict) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     # Добавляем кнопки вопросов

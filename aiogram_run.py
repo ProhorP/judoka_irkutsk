@@ -7,12 +7,9 @@ import handlers.media
 import handlers.anketa
 import handlers.admin
 import db.db
-# from work_time.time_func import send_time_msg
 
 async def main():
     await db.db.create_table_users()
-    # scheduler.add_job(send_time_msg, 'interval', seconds=10)
-    # scheduler.start()
     dp.include_router(start_router)
     dp.include_router(admin_router)
     await bot.delete_webhook(drop_pending_updates=True)

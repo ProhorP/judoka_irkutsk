@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from keyboards.all_kb import main_kb
-from keyboards.inline_kbs import inline_contact_kb, get_inline_gender_kb, create_qst_inline_kb
+from keyboards.inline_kbs import inline_contact_kb, get_inline_gender_kb, create_qst_inline_kb, get_inline_reg_kb
 from aiogram.filters import CommandStart, Command, CommandObject
 from create_bot import questions
 
@@ -15,6 +15,7 @@ from .anketa import Form
 from aiogram.fsm.context import FSMContext
 from db.db import get_user_data
 from handlers.anketa import start_router
+from create_bot import admins
 
 @start_router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
@@ -22,12 +23,9 @@ async def cmd_start(message: Message, state: FSMContext):
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
         user_info = await get_user_data(user_id=message.from_user.id)
 
-    if user_info:
-        await message.answer('Привет. Я вижу, что ты зарегистрирован, а значит тебе можно '
-                             'посмотреть, как выглядит твой профиль.', reply_markup=main_kb(message.from_user.id))
-    else:
-        await message.answer('Привет. Для начала выбери свой пол:', reply_markup=get_inline_gender_kb())
-        await state.set_state(Form.gender)
+    if user_info == None:
+        await message.answer('Привет. Для начала пройди регистрацию:', reply_markup=get_inline_reg_kb())
+        await state.set_state(Form.registration)
 
 @start_router.message(F.text == 'Связаться с нами')
 async def cmd_start_3(message: Message):
@@ -40,15 +38,11 @@ async def send_phone(call: CallbackQuery):
                               '+7‒952‒627‒01‒35\n'
                               '+7 (3952) 99‒20‒09')
 
-# await bot.send_message(chat_id=301711111, text='Hello Nelli!')
-
-@start_router.message(F.text == 'На главную')
-async def send_back_home(message: Message):
-    await message.answer(eply_markup=main_kb(message.from_user.id))
 
 @start_router.message(Command('faq'))
 async def cmd_start_2(message: Message):
     await message.answer('Сообщение с инлайн клавиатурой с вопросами', reply_markup=create_qst_inline_kb(questions))
+
 
 @start_router.callback_query(F.data.startswith('qst_'))
 async def cmd_start1(call: CallbackQuery):
@@ -62,16 +56,6 @@ async def cmd_start1(call: CallbackQuery):
         await asyncio.sleep(2)
         await call.message.answer(msg_text, reply_markup=create_qst_inline_kb(questions))
 
-@start_router.message(Command(commands=["settings", "about"]))
-async def univers_cmd_handler(message: Message, command: CommandObject):
-    command_args: str = command.args
-    command_name = 'settings' if 'settings' in message.text else 'about'
-    response = f'Была вызвана команда /{command_name}'
-    if command_args:
-        response += f' с меткой <b>{command_args}</b>'
-    else:
-        response += ' без метки'
-    await message.answer(response)
 
 @start_router.message(F.text.contains('Профиль'))
 async def start_profile(message: Message, state: FSMContext):
@@ -89,3 +73,21 @@ async def start_profile(message: Message, state: FSMContext):
         )
 
         await message.answer_photo(photo=user_info.get('photo'), caption=profile_message)
+
+
+@start_router.message(F.text == 'Запись на первую тренировку')
+async def start_profile(message: Message, state: FSMContext):
+    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+        user_info = await get_user_data(user_id=message.from_user.id)
+        profile_message = (
+            f"<b>👤 Заявка на первую тренировку:</b>\n"
+            f"<b>💼 Логин telegram:</b> @{user_info['user_login']}\n"
+            f"<b>📛 Полное имя:</b> {user_info['full_name']}\n"
+            f"<b>🧑‍🦰 Пол:</b> {user_info['gender']}\n"
+            f"<b>🎂 Возраст:</b> {user_info['age']}\n"
+            f"<b>📝 О себе:</b> {user_info['about']}\n"
+        )
+
+        for admin_telegram_id in admins:
+            await bot.send_photo(chat_id=admin_telegram_id, photo=user_info.get('photo'), caption=profile_message)
+        await message.answer(text = 'Ваша заявка успешно отправлена', eply_markup=main_kb(message.from_user.id))

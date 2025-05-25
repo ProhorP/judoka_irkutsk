@@ -1,6 +1,5 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, KeyboardButtonPollType
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from create_bot import admins
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import BotCommand, BotCommandScopeDefault
 from create_bot import bot
 
@@ -29,7 +28,6 @@ def main_kb(user_telegram_id: int):
 def admin_kb():
     kb_list = [
         KeyboardButton(text="Сделать рассылку"),
-         KeyboardButton(text="Редактировать FAQ"),
          KeyboardButton(text="На главную")
     ]
     keyboard = ReplyKeyboardMarkup(
