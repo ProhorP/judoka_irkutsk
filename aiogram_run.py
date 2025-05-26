@@ -3,7 +3,6 @@ from create_bot import bot, dp, scheduler
 from handlers.start import start_router
 from handlers.admin import admin_router
 from keyboards.all_kb import set_commands
-import handlers.media
 import handlers.anketa
 import handlers.admin
 import db.db

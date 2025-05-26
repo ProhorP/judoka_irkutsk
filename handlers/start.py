@@ -70,7 +70,7 @@ async def start_profile(message: Message, state: FSMContext):
             f"<b>📝 О себе:</b> {user_info['about']}\n"
         )
 
-        await message.answer_photo(photo=user_info.get('photo'), caption=profile_message)
+        await message.answer(profile_message)
 
 
 @start_router.message(F.text == 'Запись на первую тренировку')
@@ -87,5 +87,5 @@ async def start_profile(message: Message, state: FSMContext):
         )
 
         for admin_telegram_id in admins:
-            await bot.send_photo(chat_id=admin_telegram_id, photo=user_info.get('photo'), caption=profile_message)
+            await bot.send_message(chat_id=admin_telegram_id, text=profile_message)
         await message.answer(text = 'Ваша заявка успешно отправлена', eply_markup=main_kb(message.from_user.id))

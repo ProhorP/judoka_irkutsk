@@ -27,7 +27,6 @@ class Form(StatesGroup):
     gender = State()
     age = State()
     full_name = State()
-    photo = State()
     about = State()
     check_state = State()
 
@@ -76,30 +75,8 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 @start_router.message(F.text, Form.full_name)
 async def start_questionnaire_process(message: Message, state: FSMContext):
     await state.update_data(full_name=message.text)
-    await message.answer('А теперь отправьте фото, которое будет использоваться в вашем профиле: ')
-    await state.set_state(Form.photo)
-
-
-@start_router.message(F.photo, Form.photo)
-async def start_questionnaire_process(message: Message, state: FSMContext):
-    photo_id = message.photo[-1].file_id
-    await state.update_data(photo=photo_id)
     await message.answer('А теперь расскажите пару слов о себе: ')
     await state.set_state(Form.about)
-
-
-@start_router.message(F.document.mime_type.startswith('image/'), Form.photo)
-async def start_questionnaire_process(message: Message, state: FSMContext):
-    photo_id = message.document.file_id
-    await state.update_data(photo=photo_id)
-    await message.answer('А теперь расскажите пару слов о себе: ')
-    await state.set_state(Form.about)
-
-
-@start_router.message(F.document, Form.photo)
-async def start_questionnaire_process(message: Message, state: FSMContext):
-    await message.answer('Пожалуйста, отправьте фото!')
-    await state.set_state(Form.photo)
 
 
 @start_router.message(F.text, Form.about)
@@ -113,7 +90,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
               f'<b>Возраст</b>: {data.get("age")} лет\n' \
               f'<b>О себе</b>: {data.get("about")}'
 
-    await message.answer_photo(photo=data.get('photo'), caption=caption, reply_markup=check_data())
+    await message.answer(caption, reply_markup=check_data())
     await state.set_state(Form.check_state)
 
 
