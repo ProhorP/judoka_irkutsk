@@ -42,6 +42,7 @@ async def start_profile(message: Message, state: FSMContext):
 
 @admin_router.callback_query(F.data, Notify.registration)
 async def start_notify(call: CallbackQuery, state: FSMContext):
+    await call.message.edit_reply_markup(reply_markup=None)
     await state.clear()
     if call.data == 'yes':
         await call.message.answer('Приложите фото поста', reply_markup=ReplyKeyboardRemove())
@@ -81,6 +82,7 @@ async def start_notify(message: Message, state: FSMContext):
 # отправляем пост
 @admin_router.callback_query(F.data == 'correct', Notify.check_state)
 async def start_notify(call: CallbackQuery, state: FSMContext):
+    await call.message.edit_reply_markup(reply_markup=None)
     data = await state.get_data()
     users = await get_user_data()
     for user in users:
@@ -96,6 +98,7 @@ async def start_notify(call: CallbackQuery, state: FSMContext):
 # запускаем написание поста заново 
 @admin_router.callback_query(F.data == 'incorrect', Notify.check_state)
 async def start_notify(call: CallbackQuery, state: FSMContext):
+    await call.message.edit_reply_markup(reply_markup=None)
     await call.answer('Запускаем сценарий с начала')
     await call.message.answer('Вы действительно хотите написать пост?: ', reply_markup=get_inline_notify_kb())
     await state.set_state(Notify.registration)

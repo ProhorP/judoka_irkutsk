@@ -36,6 +36,7 @@ start_router = Router()
 @start_router.callback_query(F.data, Form.registration)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await state.clear()
+    await call.message.edit_reply_markup(reply_markup=None)
     if call.data == 'yes':
         await state.update_data(user_id=call.from_user.id)
         await state.update_data(user_login=call.from_user.username)
@@ -47,6 +48,7 @@ async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
 
 @start_router.callback_query((F.data.contains('Мужчина')) | (F.data.contains('Женщина')), Form.gender)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
+    await call.message.edit_reply_markup(reply_markup=None)
     await state.update_data(gender=call.data)
     await call.message.answer('Супер! А теперь напиши сколько тебе полных лет: ', reply_markup=ReplyKeyboardRemove())
     await state.set_state(Form.age)
@@ -54,6 +56,7 @@ async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
 
 @start_router.callback_query(F.data, Form.gender)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
+    await call.message.edit_reply_markup(reply_markup=None)
     await call.message.answer(f'Вы ввели: {call.data}', reply_markup=get_inline_gender_kb())
     await call.message.answer('Пожалуйста, выбери вариант из тех что в клавиатуре: ', reply_markup=get_inline_gender_kb())
     await state.set_state(Form.gender)
@@ -117,7 +120,6 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 # сохраняем данные
 @start_router.callback_query(F.data == 'correct', Form.check_state)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
-    await call.answer('Данные сохранены')
     user_data = await state.get_data()
     await insert_user(user_data)
     await call.message.edit_reply_markup(reply_markup=None)
