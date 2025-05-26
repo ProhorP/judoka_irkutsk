@@ -10,10 +10,12 @@ async def set_commands():
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
 def main_kb(user_telegram_id: int):
-    kb_list = [
-        KeyboardButton(text="Запись на первую тренировку"),
+    kb_list = [[
+        KeyboardButton(text="Запись на первую тренировку")],
+        [
          KeyboardButton(text="👤 Профиль"),
          KeyboardButton(text="Связаться с нами")
+    ]
     ]
     if user_telegram_id in admins:
         kb_list.append([KeyboardButton(text="⚙️ Админ панель")])
@@ -27,8 +29,10 @@ def main_kb(user_telegram_id: int):
 
 def admin_kb():
     kb_list = [
+        [
         KeyboardButton(text="Сделать рассылку"),
          KeyboardButton(text="На главную")
+        ]
     ]
     keyboard = ReplyKeyboardMarkup(
         keyboard=kb_list,

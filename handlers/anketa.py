@@ -38,29 +38,24 @@ start_router = Router()
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await state.clear()
     if call.data == 'yes':
-        await state.update_data(user_id=call.message.from_user.id)
-        await state.update_data(user_login=call.message.from_user.username)
-        async with ChatActionSender.typing(bot=bot, chat_id=call.message.chat.id):
-            await asyncio.sleep(2)
-            await call.message.answer('Привет. Для начала выбери свой пол: ', reply_markup=get_inline_gender_kb())
+        await state.update_data(user_id=call.from_user.id)
+        await state.update_data(user_login=call.from_user.username)
+        await call.message.answer('Для начала выбери свой пол: ', reply_markup=get_inline_gender_kb())
         await state.set_state(Form.gender)
 
 
-@start_router.callback_query((F.data.lower().contains('мужчина')) | (F.data.lower().contains('женщина')), Form.gender)
+@start_router.callback_query((F.data.contains('Мужчина')) | (F.data.contains('Женщина')), Form.gender)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await state.update_data(gender=call.message.text)
-    async with ChatActionSender.typing(bot=bot, chat_id=call.message.chat.id):
-        await asyncio.sleep(2)
-        await call.message.answer('Супер! А теперь напиши сколько тебе полных лет: ', reply_markup=ReplyKeyboardRemove())
+    await call.message.answer('Супер! А теперь напиши сколько тебе полных лет: ', reply_markup=ReplyKeyboardRemove())
     await state.set_state(Form.age)
 
 
 @start_router.callback_query(F.data, Form.gender)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     await state.update_data(name=call.message.text)
-    async with ChatActionSender.typing(bot=bot, chat_id=call.message.chat.id):
-        await asyncio.sleep(2)
-        await call.message.answer('Пожалуйста, выбери вариант из тех что в клавиатуре: ', reply_markup=get_inline_gender_kb())
+    await call.message.answer(f'Вы ввели: {call.data}', reply_markup=get_inline_gender_kb())
+    await call.message.answer('Пожалуйста, выбери вариант из тех что в клавиатуре: ', reply_markup=get_inline_gender_kb())
     await state.set_state(Form.gender)
 
 

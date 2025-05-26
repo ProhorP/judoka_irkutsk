@@ -24,7 +24,7 @@ async def start_profile(message: Message, state: FSMContext):
 
 @admin_router.message(F.text == 'На главную')
 async def send_back_home(message: Message):
-    await message.answer(eply_markup=main_kb(message.from_user.id))
+    await message.answer('Главная страница', reply_markup=main_kb(message.from_user.id))
 
       
 class Notify(StatesGroup):
@@ -44,9 +44,7 @@ async def start_profile(message: Message, state: FSMContext):
 async def start_notify(call: CallbackQuery, state: FSMContext):
     await state.clear()
     if call.data == 'yes':
-        async with ChatActionSender.typing(bot=bot, chat_id=call.message.chat.id):
-            await asyncio.sleep(2)
-            await call.message.answer('Приложите фото поста', reply_markup=ReplyKeyboardRemove())
+        await call.message.answer('Приложите фото поста', reply_markup=ReplyKeyboardRemove())
         await state.set_state(Notify.photo)
 
 
@@ -86,8 +84,12 @@ async def start_notify(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     users = await get_user_data()
     for user in users:
-        await bot.send_photo(chat_id=user.get("user_id"), photo=data.get('photo'), caption=data.get('caption'))
-    await call.answer('Пост отправлен', reply_markup=admin_kb())
+        try:
+            await bot.send_photo(chat_id=user.get("user_id"), photo=data.get('photo'), caption=data.get('caption'))
+        except:
+            None
+
+    await call.message.answer('Пост отправлен', reply_markup=admin_kb())
     await state.clear()
 
 

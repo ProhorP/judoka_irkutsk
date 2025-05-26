@@ -26,6 +26,9 @@ async def cmd_start(message: Message, state: FSMContext):
     if user_info == None:
         await message.answer('Привет. Для начала пройди регистрацию:', reply_markup=get_inline_reg_kb())
         await state.set_state(Form.registration)
+    else:
+        await message.answer('Привет. Ты зарегистрирован, что тебе нужно?', reply_markup=main_kb(message.from_user.id))
+
 
 @start_router.message(F.text == 'Связаться с нами')
 async def cmd_start_3(message: Message):
@@ -50,11 +53,8 @@ async def cmd_start1(call: CallbackQuery):
     qst_id = int(call.data.replace('qst_', ''))
     qst_data = questions[qst_id]
     msg_text = f'Ответ на вопрос {qst_data.get("qst")}\n\n' \
-               f'<b>{qst_data.get("answer")}</b>\n\n' \
-               f'Выбери другой вопрос:'
-    async with ChatActionSender(bot=bot, chat_id=call.from_user.id, action="typing"):
-        await asyncio.sleep(2)
-        await call.message.answer(msg_text, reply_markup=create_qst_inline_kb(questions))
+               f'<b>{qst_data.get("answer")}</b>\n\n' 
+    await call.message.answer(msg_text)
 
 
 @start_router.message(F.text.contains('Профиль'))

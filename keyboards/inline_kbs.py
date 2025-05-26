@@ -12,8 +12,8 @@ def inline_contact_kb():
 
 def get_inline_gender_kb():
     inline_kb_list = [
-        [InlineKeyboardButton(text="👨‍🦱Мужчина", callback_data='gender_man')],
-        [InlineKeyboardButton(text="👩‍🦱Женщина", callback_data='gender_woman')]
+        [InlineKeyboardButton(text="👨‍🦱Мужчина", callback_data='Мужчина')],
+        [InlineKeyboardButton(text="👩‍🦱Женщина", callback_data='Женщина')]
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
