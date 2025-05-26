@@ -63,12 +63,10 @@ async def start_profile(message: Message, state: FSMContext):
         user_info = await get_user_data(user_id=message.from_user.id)
         profile_message = (
             f"<b>👤 Профиль пользователя:</b>\n"
-            f"<b>🆔 ID:</b> {user_info['user_id']}\n"
-            f"<b>💼 Логин:</b> @{user_info['user_login']}\n"
+            f"<b>💼 Логин telegram:</b> @{user_info['user_login']}\n"
             f"<b>📛 Полное имя:</b> {user_info['full_name']}\n"
             f"<b>🧑‍🦰 Пол:</b> {user_info['gender']}\n"
             f"<b>🎂 Возраст:</b> {user_info['age']}\n"
-            f"<b>📅 Дата регистрации:</b> {user_info['date_reg']}\n"
             f"<b>📝 О себе:</b> {user_info['about']}\n"
         )
 

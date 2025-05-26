@@ -27,7 +27,6 @@ class Form(StatesGroup):
     gender = State()
     age = State()
     full_name = State()
-    user_login = State()
     photo = State()
     about = State()
     check_state = State()
@@ -42,18 +41,19 @@ async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
         await state.update_data(user_login=call.from_user.username)
         await call.message.answer('Для начала выбери свой пол: ', reply_markup=get_inline_gender_kb())
         await state.set_state(Form.gender)
+    else:
+        await call.message.answer('Без регистрации можно узнать только часто задаваемые вопросы.', reply_markup=ReplyKeyboardRemove())
 
 
 @start_router.callback_query((F.data.contains('Мужчина')) | (F.data.contains('Женщина')), Form.gender)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
-    await state.update_data(gender=call.message.text)
+    await state.update_data(gender=call.data)
     await call.message.answer('Супер! А теперь напиши сколько тебе полных лет: ', reply_markup=ReplyKeyboardRemove())
     await state.set_state(Form.age)
 
 
 @start_router.callback_query(F.data, Form.gender)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
-    await state.update_data(name=call.message.text)
     await call.message.answer(f'Вы ввели: {call.data}', reply_markup=get_inline_gender_kb())
     await call.message.answer('Пожалуйста, выбери вариант из тех что в клавиатуре: ', reply_markup=get_inline_gender_kb())
     await state.set_state(Form.gender)
