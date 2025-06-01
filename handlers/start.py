@@ -35,6 +35,6 @@ async def cmd_start1(call: CallbackQuery):
     await call.answer()
     qst_id = int(call.data.replace('qst_', ''))
     qst_data = questions[qst_id]
-    msg_text = f'Ответ на вопрос {qst_data.get("qst")}\n\n' \
+    msg_text = f'Ответ на вопрос "{qst_data.get("qst")}"\n\n' \
                f'<b>{qst_data.get("answer")}</b>\n\n' 
     await call.message.answer(msg_text)
