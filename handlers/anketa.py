@@ -1,19 +1,16 @@
-import os
 from aiogram import Router, F
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
-from aiogram.filters import Command
 from aiogram.filters.state import State, StatesGroup
 from aiogram.types import Message
-from keyboards.all_kb import main_kb
-from aiogram.utils.chat_action import ChatActionSender
 from create_bot import bot
-import asyncio
 import re
 from keyboards.inline_kbs import get_inline_gender_kb, check_data, get_inline_reg_kb
 from aiogram.types import CallbackQuery
 from aiogram.types import ReplyKeyboardRemove
 from db.db import insert_user
+from db.db import get_user_data
+from create_bot import admins
 
 def extract_number(text):
     match = re.search(r'\b(\d+)\b', text)
@@ -100,8 +97,21 @@ async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
     await insert_user(user_data)
     await call.message.edit_reply_markup(reply_markup=None)
-    await call.message.answer('Благодарю за регистрацию. Ваши данные успешно сохранены!',
-                              reply_markup=main_kb(call.from_user.id))
+    await call.message.answer('Благодарю за регистрацию. Ваши данные успешно сохранены!')
+
+    user_info = await get_user_data(user_id=call.from_user.id)
+    profile_message = (
+            f"<b>👤 Заявка на первую тренировку:</b>\n"
+            f"<b>💼 Логин telegram:</b> @{user_info['user_login']}\n"
+            f"<b>📛 Полное имя:</b> {user_info['full_name']}\n"
+            f"<b>🧑‍🦰 Пол:</b> {user_info['gender']}\n"
+            f"<b>🎂 Возраст:</b> {user_info['age']}\n"
+            f"<b>📝 О себе:</b> {user_info['about']}\n"
+        )
+
+    for admin_telegram_id in admins:
+        await bot.send_message(chat_id=admin_telegram_id, text=profile_message)
+    await call.message.answer(text = 'Ваша заявка на первую тренировку успешно отправлена. Приходите на ближайшее занятие, расписание есть в частых вопросах')
     await state.clear()
 
 

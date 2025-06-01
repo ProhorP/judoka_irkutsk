@@ -1,15 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-def inline_contact_kb():
-    inline_kb_list = [
-        [InlineKeyboardButton(text="VK", url='https://vk.com/sc_judoist')],
-        [InlineKeyboardButton(text="Канал", url='https://t.me/JudokaIrkutsk')],
-        [InlineKeyboardButton(text="Телефон", callback_data='get_phone')],
-        [InlineKeyboardButton(text="2ГИС", url='https://go.2gis.com/ogwBz')]
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
-
 def get_inline_gender_kb():
     inline_kb_list = [
         [InlineKeyboardButton(text="👨‍🦱Мужчина", callback_data='Мужчина')],
@@ -21,13 +12,6 @@ def get_inline_reg_kb():
     inline_kb_list = [
         [InlineKeyboardButton(text="✅Да, пройти регистрацию", callback_data='yes')],
         [InlineKeyboardButton(text="❌Без регистрации", callback_data='no')]
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
-
-def get_inline_notify_kb():
-    inline_kb_list = [
-        [InlineKeyboardButton(text="✅Да, отправить пост", callback_data='yes')],
-        [InlineKeyboardButton(text="❌Нет", callback_data='no')]
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
